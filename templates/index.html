@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Taspberry Pi timelapse</title>
+</head>
+<body>
+<h2> Timelapse control center</h2>
+    <form method="POST" action="{{ url_for('index') }}">
+        {{ form.csrf_token }}
+
+        {{ form.name.label }} {{ form.name(size=10) }}
+        <br>
+        {{ form.intervall.label }} {{ form.intervall(size=10) }}
+        <br>
+        <br>
+        {{ form.starting }}
+        {{ form.preview }}
+        <br>
+        <p>Reboot or shutdown your Raspberry Pi.</p>
+        {{ form.reboot }}
+        {{ form.ending }}
+
+    </form>
+    <p>Open the link below to display the preview image.</p>
+    <a title="preview" href="{{ url_for('static',filename="preview.jpg")}}" target="_blank" rel="bookmark noopener">Preview</a>
+    <br>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        <ul class=flashes>
+        {% for message in messages %}
+          <li>{{ message }}</li>
+        {% endfor %}
+        </ul>
+      {% endif %}
+    {% endwith %}
+
+  </body>
+</html>
