@@ -5,35 +5,41 @@
     <title>Taspberry Pi timelapse</title>
 </head>
 <body>
-<h2> Timelapse control center</h2>
+<h2>Timelapse control center</h2>
+  {% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <ul class=flashes>
+    {% for message in messages %}
+      <li>{{ message }}</li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  {% endwith %}
     <form method="POST" action="{{ url_for('index') }}">
         {{ form.csrf_token }}
-
+        <h3>Raspistill configuration:</h3>
         {{ form.name.label }} {{ form.name(size=10) }}
         <br>
         {{ form.intervall.label }} {{ form.intervall(size=10) }}
         <br>
+        <p><strong>Set picture properties:</strong></p>
+        {{ form.width.label }} {{ form.width(size=4) }}
+        {{ form.height.label }} {{ form.height(size=4) }}
         <br>
+        {{ form.quality.label }} {{ form.quality(size=3) }}
+        <br>
+        <p><strong>Raspistill commands:</strong></p>       
         {{ form.starting }}
         {{ form.preview }}
+        <p>Open the link below to display the preview image.</p>
+        <a title="preview" href="{{ url_for('static',filename="preview.jpg")}}" target="_blank" rel="bookmark noopener">Preview</a>    
         <br>
-        <p>Reboot or shutdown your Raspberry Pi.</p>
+        <p><strong>Reboot or shutdown your Raspberry Pi.</strong></p>
         {{ form.reboot }}
         {{ form.ending }}
 
     </form>
-    <p>Open the link below to display the preview image.</p>
-    <a title="preview" href="{{ url_for('static',filename="preview.jpg")}}" target="_blank" rel="bookmark noopener">Preview</a>
-    <br>
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <ul class=flashes>
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+   
 
   </body>
 </html>

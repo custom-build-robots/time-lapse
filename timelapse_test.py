@@ -3,6 +3,12 @@ from flask_wtf import Form
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
+#from flask import Flask, render_template, flash
+#from flask_wtf import FlaskForm
+#from wtforms import StringField, SubmitField
+#from wtforms.validators import DataRequired
+
+
 import os
 #import errno
 import time
@@ -23,9 +29,11 @@ dest_video = ""
 time_string = ""
 output_ffmpeg = ""
 output_raspistill = ""
+active_raspistill = False
 
 global time_until
 time_until = datetime.now()
+
 
 # mount usb drive as usual
 os.system("sudo mount -t exfat -o utf8,uid=pi,gid=pi,noatime /dev/sda1 /media/usbstick >> /home/pi/mount.log 2>&1 &")
@@ -55,34 +63,27 @@ app.config['SECRET_KEY'] = 'well-secret-password'
 class MyForm(Form):
     name = StringField(label='Timelapse duration (minutes)', validators=[DataRequired()], default="15")
     intervall = StringField(label='Picture intervall (seconds)', validators=[DataRequired()], default="1")
-    width   = StringField(label='Resolution ', validators=[DataRequired()], default="1920")
-    height   = StringField(label=' x ', validators=[DataRequired()], default="1080")
-    quality   = StringField(label='Quality (...%): ', validators=[DataRequired()], default="80")
-
-    #name = StringField(label='Time in minutes', [validators.Required("15")])
     starting = SubmitField(label='Start recording')
     preview  = SubmitField(label='Preview picture')
     reboot   = SubmitField(label='Raspberry reboot')
-    ending   = SubmitField(label='Raspberry shutdown')
-
+    ending   = SubmitField(label='Raspberry shutdown')    
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     form = MyForm()
     global time_until
-
     flash(
         "USB drive status: {usb}".format(
             usb = str(subprocess.check_output("df -h | grep sda1", shell=True))
         )
     )
 
-    if time_until > datetime.now():
-        flash(
-            "Timelapse now active until: {time_to}".format(
-            time_to=time_until.strftime('%Y-%m-%d %H:%M:%S')
-        )
-        )
+    #if time_until > datetime.now():
+    #    flash(
+    #        "Timelapse now active until: {time_to}".format(
+    #        time_to=time_until.strftime('%Y-%m-%d %H:%M:%S')
+    #    )
+    #    )
 
     if form.validate_on_submit():
         if form.starting.data:
@@ -95,17 +96,11 @@ def index():
             dest_pic, time_string = getpath()
             dest_video = "/media/usbstick/video/"
 
-
-            width = int(form.width.data)
-            height = int(form.height.data)
-            quality = int(form.quality.data)
-
             # create path
             create_path(dest_pic)
             
             # record time until
             time_until = datetime.now() + timedelta(minutes=runtime_min)
-            # print "Value : {name}".format(name=form.name.data)
             flash(
             "Start recording for {name} minutes until {time_to}.".format(
                 name=form.name.data,
@@ -118,15 +113,17 @@ def index():
             )
             )
 
-            os.system("raspistill -t "+str(runtime_mili)+" -tl "+str(intervall)+" -o "+ dest_pic +"image%06d.jpg -q "+ str(quality) +" -w "+ str(width) +" -h "+ str(height) +" >> "+dest_pic+"raspistill.log 2>&1 &")
-            os.system("sh /home/pi/timelapse/ffmpeg.sh "+str(dest_pic)+" "+str(time_string)+" "+str(dest_video)+" "+str(runtime_sec)+" >> "+dest_pic+"ffmpeg.log 2>&1 &")
+            if active_raspistill == False:
+                os.system("raspistill -t "+str(runtime_mili)+" -tl "+str(intervall)+" -o "+ dest_pic +"image%06d.jpg -w 1920 -h 1080 >> "+dest_pic+"raspistill.log 2>&1 &")
+                os.system("sh /home/pi/timelapse/ffmpeg.sh "+str(dest_pic)+" "+str(time_string)+" "+str(dest_video)+" "+str(runtime_sec)+" >> "+dest_pic+"ffmpeg.log 2>&1 &")
+                active_raspistill = True
+            else:
+                flash(
+                "Raspistill is running. A new timelapse instance could not be started parallel!"
+                )               
 
         elif form.preview.data:
             dest_pic, time_string = getpath()
-
-            width = int(form.width.data)
-            height = int(form.height.data)
-            quality = int(form.quality.data)
 
             # create path
             create_path(dest_pic)
@@ -134,9 +131,7 @@ def index():
             "Creating preview image preview.jpg"
             )
             
-            #os.system("raspistill -o /media/usbstick/preview/preview.jpg -w 480 -h 270")
-            os.system("raspistill -o /media/usbstick/preview/preview.jpg -q "+ str(quality) +" -w "+ str(width) +" -h "+ str(height))
-
+            os.system("raspistill -o /media/usbstick/preview/preview.jpg -w 480 -h 270")
         
         elif form.ending.data:
             flash(
@@ -146,7 +141,7 @@ def index():
 
         elif form.reboot.data:
             flash(
-            "Shutting down the Raspberry Pi."
+            "Rebooting the Raspberry Pi."
             )
             os.system("sudo reboot")    
 
@@ -155,10 +150,9 @@ def index():
     if form.errors:
         for error_field, error_message in form.errors.iteritems():
             flash("Field : {field}; error : {error}".format(field=error_field, error=error_message))
-
-    return render_template('index.html', form=form)
+        return render_template('index.html', form=form)
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=8181, debug=False)
+    app.run(host='0.0.0.0', port=8080, debug=False)
 
