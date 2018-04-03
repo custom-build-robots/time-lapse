@@ -4,4 +4,4 @@ This is my solution for a imeplase program with web interface running on a Raspb
 A detailed description of my solution is available on my blog: https://custom-build-robots.com/top-story-de/raspberry-pi-timelapse-fotografie-tutorial-bilder-im-zeitraffer-video/9970
 
 
-![timelapse web interface](https://custom-build-robots.com/wp-content/uploads/2018/03/Raspberry_Pi_Zeitraffer_Web_Oberflaeche-273x300.jpg)
+![timelapse web interface](https://custom-build-robots.com/wp-content/uploads/2018/03/Raspberry_Pi_Zeitraffer_control_center_v_1_1-241x300.jpg)
