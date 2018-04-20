@@ -1,5 +1,5 @@
-# time lapse program for Raspberry Pi
-This is my solution for a time lapse program with included web interface running on a Raspberry Pi 2 Model B. I am using this solution to create MP4 videos out of thousands of recorded pictures with the Raspberry Pi camera.
+# Time-lapse program for Raspberry Pi
+This is my solution for a time-lapse program with included web interface running on a Raspberry Pi 2 Model B. I am using this solution to create MP4 videos out of thousands of recorded pictures with the Raspberry Pi camera.
 I build this solution with a Raspberry Pi camera to preserve the mechanics of a DSLR system. If you create 10.000 pictures for a single video a non-mechanical and silent solution is very smart.
 
 A detailed description of my solution is available on my blog: https://custom-build-robots.com/top-story-de/raspberry-pi-timelapse-fotografie-tutorial-bilder-im-zeitraffer-video/9970 in German only (sorry I will translate the posts in the future).
