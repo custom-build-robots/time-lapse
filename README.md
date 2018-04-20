@@ -13,5 +13,5 @@ A detailed description of my solution is available on my blog: https://custom-bu
 - Option to enable / disable the automatic ffmpeg calculation
 - display the pictures folders for which no ffmpeg calculation was done
 
-## nown problems
+## Known problems
 I used the latest Raspberry Pi 3 Model B+ and together with raspistill I actual see many reboots. Now I switched back to my old Raspberry Pi 2 Model B to record the pictures and the system works very well over 10 hours.
