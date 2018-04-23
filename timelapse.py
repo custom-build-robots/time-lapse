@@ -1,10 +1,17 @@
+#!/usr/bin/env python
+# coding: latin-1
+# Autor:   Ingmar Stapel
+# Datum:   20180423
+# Version:   1.1
+# Homepage:   http://custom-build-robots.com
+# This program is developed to generate time-lapse videos.
+
 from flask import Flask, render_template, flash
 from flask_wtf import Form
 from wtforms import StringField, SubmitField
 from wtforms.validators import DataRequired
 
 import os
-#import errno
 import time
 import subprocess
 
@@ -27,9 +34,12 @@ output_raspistill = ""
 global time_until
 time_until = datetime.now()
 
+# Enable / Disable automatic ffmpeg calculation.
+ffmpeg = True
+
 # mount usb drive as usual
 os.system("sudo mount -t exfat -o utf8,uid=pi,gid=pi,noatime /dev/sda1 /media/usbstick >> /home/pi/mount.log 2>&1 &")
-time.sleep(4)
+time.sleep(2)
 
 # Function to make the path in which the pictures should be stored
 def create_path(path):
@@ -44,13 +54,12 @@ def getpath():
     # get a string with the current date and time
     time_string = time.strftime("%Y%m%d%H%M%S")
     # picture destination path
-    dest_pic = "/media/usbstick/pictures_"+time_string+"/"
+    dest_pic = "/media/usbstick/pictures/pictures_"+time_string+"/"
     return dest_pic, time_string
 
 app = Flask(__name__, static_folder='/media/usbstick/preview',)
 app.config['DEBUG'] = True
 app.config['SECRET_KEY'] = 'well-secret-password'
-
 
 class MyForm(Form):
     name = StringField(label='Timelapse duration (minutes)', validators=[DataRequired()], default="15")
@@ -64,7 +73,6 @@ class MyForm(Form):
     preview  = SubmitField(label='Preview picture')
     reboot   = SubmitField(label='Raspberry reboot')
     ending   = SubmitField(label='Raspberry shutdown')
-
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -118,8 +126,12 @@ def index():
             )
             )
 
+            # Raspistill call
             os.system("raspistill -t "+str(runtime_mili)+" -tl "+str(intervall)+" -o "+ dest_pic +"image%06d.jpg -q "+ str(quality) +" -w "+ str(width) +" -h "+ str(height) +" >> "+dest_pic+"raspistill.log 2>&1 &")
-            os.system("sh /home/pi/timelapse/ffmpeg.sh "+str(dest_pic)+" "+str(time_string)+" "+str(dest_video)+" "+str(runtime_sec)+" >> "+dest_pic+"ffmpeg.log 2>&1 &")
+
+            # ffmpeg calculation call.
+            if ffmpeg:
+                os.system("sh /home/pi/timelapse/ffmpeg.sh "+str(dest_pic)+" "+str(time_string)+" "+str(dest_video)+" "+str(runtime_sec)+" >> "+dest_pic+"ffmpeg.log 2>&1 &")
 
         elif form.preview.data:
             dest_pic, time_string = getpath()
@@ -128,15 +140,7 @@ def index():
             height = int(form.height.data)
             quality = int(form.quality.data)
 
-            # create path
-            create_path(dest_pic)
-            flash(
-            "Creating preview image preview.jpg"
-            )
-            
-            #os.system("raspistill -o /media/usbstick/preview/preview.jpg -w 480 -h 270")
             os.system("raspistill -o /media/usbstick/preview/preview.jpg -q "+ str(quality) +" -w "+ str(width) +" -h "+ str(height))
-
         
         elif form.ending.data:
             flash(
@@ -157,7 +161,6 @@ def index():
             flash("Field : {field}; error : {error}".format(field=error_field, error=error_message))
 
     return render_template('index.html', form=form)
-
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=8181, debug=False)
