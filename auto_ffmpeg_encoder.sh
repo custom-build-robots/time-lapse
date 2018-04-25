@@ -17,6 +17,11 @@ pictures_dir="/media/usbstick/pictures/"
 video_dir="/media/usbstick/video/"
 
 if ! [ -d "$pictures_dir" ]; then
+    # Example command to mount a samba share from the picture recording Raspberry Pi SBC.
+    # sudo mount.cifs //192.168.1.38/timelapse /media/usbstick -o user=pi,password=raspberry,nounix,sec=ntlmssp
+
+    # This command will mount the usb drive /dev/sda1 which I use between the picture recording Raspberry Pi SBC
+    # and the ffmpeg / video generating Raspberry Pi 3 Model B+.
     sudo mount -t exfat -o utf8,uid=pi,gid=pi,noatime /dev/sda1 /media/usbstick
 fi
 
