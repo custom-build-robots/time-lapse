@@ -31,6 +31,7 @@ for Dir in $(find $pictures_dir* -maxdepth 0 -type d );
 do
     FolderName=$(basename $Dir);
 
+    # Check if the time-lapse video is already generated.
     if ! [ -e $Dir/$FolderName.log ]
     then
         echo "Starting ffmpeg encoding $DATE." >> $Dir/$FolderName.log 2>&1
